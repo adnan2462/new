@@ -1,0 +1,31 @@
+class AI:
+    def __init__(self, name, creator):
+        self.name = name
+        self.creator = creator
+        self.status = "offline"
+
+    def power_on(self):
+        self.status = "online"
+        print(f"{self.name} is now online.")
+
+    def power_off(self):
+        self.status = "offline"
+        print(f"{self.name} has been powered off.")
+
+    def greet(self):
+        if self.status == "online":
+            print(f"Hello! I am {self.name}, an AI created by {self.creator}. How can I assist you?")
+        else:
+            print(f"Sorry, {self.name} is currently offline. Please power on to interact with it.")
+
+# Creating an instance of the AI object
+my_ai = AI(name="MyAI", creator="John")
+
+# Powering on the AI
+my_ai.power_on()
+
+# Greeting
+my_ai.greet()
+
+# Powering off the AI
+my_ai.power_off()
