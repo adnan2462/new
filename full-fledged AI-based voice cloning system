@@ -1,0 +1,35 @@
+from TTS.utils.io import load_config
+from TTS.tts import TTS
+from TTS.vocoder.utils.generic_utils import setup_generator
+from TTS.vocoder.utils.io import load_checkpoint
+from TTS.utils.audio import AudioProcessor
+import torch
+
+# load configs
+TTS_MODEL = "tacotron2-DDC" # or "tacotron2-DDC" for "TTS/models/tacotron2-DDC/config.json"
+TTS_CONFIG = f"TTS/configs/{TTS_MODEL}.json"
+TTS_CONFIG = load_config(TTS_CONFIG)
+
+VOCODER_MODEL = "wavegrad" # or "wavegrad" for "TTS/models/wavegrad/config.json"
+VOCODER_CONFIG = f"TTS/configs/{VOCODER_MODEL}.json"
+VOCODER_CONFIG = load_config(VOCODER_CONFIG)
+
+# load the audio processor
+ap = AudioProcessor(**TTS_CONFIG.audio)
+
+# initialize the tts
+tts = TTS(TTS_CONFIG)
+tts.load_model(TTS_MODEL)
+
+# load the vocoder
+vocoder = setup_generator(VOCODER_CONFIG)
+checkpoint = torch.load(f"TTS/models/{VOCODER_MODEL}.pth", map_location="cpu")["model"]
+vocoder.load_state_dict(checkpoint)
+vocoder.remove_weight_norm()
+vocoder.inference_padding = 0
+
+# synthesize text
+text = "Hello, how are you?"
+wav = tts.tts(text)
+wav = vocoder.inference(torch.FloatTensor(wav).unsqueeze(0))
+ap.save_wav(wav[0], "output.wav")
